@@ -1,15 +1,19 @@
-import { MenuIcon, XIcon } from "lucide-react";
+import { BoxIcon, GripIcon, ListIcon, MenuIcon, MessageCircleMoreIcon, XIcon } from "lucide-react";
 import { assets } from "../assets/assets";
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useUser, useClerk, UserButton } from "@clerk/react";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { user } = useUser();
+  const { openSignIn } = useClerk();
+
   return (
     <>
       {/* Navbar */}
-      <nav className="z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm">
+      <nav className="sticky top-0 z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm bg-white/95 backdrop-blur border-b border-slate-200">
         <img
           onClick={() => {
             navigate("/");
@@ -27,20 +31,62 @@ const Navbar = () => {
           <Link to="/marketplace" onClick={() => scrollTo(0, 0)}>
             Marketplace
           </Link>
-          <Link to="/messages" onClick={() => scrollTo(0, 0)}>
+          <Link
+            to={user ? "/messages" : "#"}
+            onClick={() => (user ? scrollTo(0, 0) : openSignIn())}
+          >
             Messages
           </Link>
-          <Link to="/my-listings" onClick={() => scrollTo(0, 0)}>
+          <Link
+            to={user ? "/my-listings" : "#"}
+            onClick={() => (user ? scrollTo(0, 0) : openSignIn())}
+          >
             My Listings
           </Link>
         </div>
 
-        <div className="flex gap-2">
-          <button className="max-sm:hidden cursor-pointer px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full">
-            Login
-          </button>
-          <MenuIcon onClick={() => setMenuOpen(true)} className="sm:hidden" />
-        </div>
+        {!user ? (
+          <div className="flex gap-2">
+            <button
+              onClick={openSignIn}
+              className="max-sm:hidden cursor-pointer px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full"
+            >
+              Login
+            </button>
+            <MenuIcon onClick={() => setMenuOpen(true)} className="sm:hidden" />
+          </div>
+        ) : (
+          <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="Marketplace"
+                labelIcon={<GripIcon size={16} />}
+                onClick={() => navigate("/marketplace")}
+              />
+            </UserButton.MenuItems>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="Messages"
+                labelIcon={<MessageCircleMoreIcon size={16} />}
+                onClick={() => navigate("/messages")}
+              />
+            </UserButton.MenuItems>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="My Listings"
+                labelIcon={<ListIcon size={16} />}
+                onClick={() => navigate("/my-listings")}
+              />
+            </UserButton.MenuItems>
+            <UserButton.MenuItems>
+              <UserButton.Action
+                label="My Orders"
+                labelIcon={<BoxIcon size={16} />}
+                onClick={() => navigate("/my-orders")}
+              />
+            </UserButton.MenuItems>
+          </UserButton>
+        )}
       </nav>
 
       {/* Mobile Menu */}
@@ -53,13 +99,16 @@ const Navbar = () => {
         <Link to="/marketplace" onClick={() => scrollTo(0, 0)}>
           Marketplace
         </Link>
-        <Link to="/messages" onClick={() => scrollTo(0, 0)}>
+        <Link to="/messages" onClick={openSignIn}>
           Messages
         </Link>
-        <Link to="/my-listings" onClick={() => scrollTo(0, 0)}>
+        <Link to="/my-listings" onClick={openSignIn}>
           My Listings
         </Link>
-        <button className="cursor-pointer px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full">
+        <button
+          onClick={openSignIn}
+          className="cursor-pointer px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full"
+        >
           Login
         </button>
         <XIcon

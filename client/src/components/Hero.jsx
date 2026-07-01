@@ -12,7 +12,7 @@ const Hero = () => {
 
   return (
     <>
-      <div className="min-h-screen pb-20">
+      <div className="pb-8 md:pb-12">
         {/* Hero Section */}
         <div className="relative flex flex-col items-center justify-center px-4 md:px-16 lg:px-24 xl:px-40 text-black">
           <div className="absolute top-28 xl:top-10 -z-10 left-1/4 size-72 sm:size-96 xl:size-120 2xl:size-132 bg-indigo-300 blur-[100px] opacity-30"></div>
@@ -92,19 +92,19 @@ const Hero = () => {
           {/* Search Box - Updated */}
           <form
             onSubmit={onSubmitHandler}
-            className="w-full max-w-3xl mt-2"
+            className="w-full max-w-3xl mt-2 px-1 sm:px-0"
           >
-            <div className="relative flex items-center bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <div className="relative flex flex-col gap-2 bg-white rounded-2xl shadow-lg border border-gray-200 p-2 sm:flex-row sm:items-center sm:gap-0 sm:overflow-hidden hover:shadow-xl transition-shadow duration-300">
               <input
                 onChange={(e) => setInput(e.target.value)}
                 value={input}
                 type="text"
                 placeholder="Instagram account"
-                className="flex-1 px-6 py-4 text-gray-700 placeholder-gray-400 outline-none bg-transparent text-lg"
+                className="w-full min-w-0 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base text-gray-700 placeholder-gray-400 outline-none transition focus:border-indigo-400 focus:bg-white sm:flex-1 sm:border-0 sm:bg-transparent sm:px-6 sm:py-4 sm:text-lg"
               />
               <button
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 m-1.5 rounded-xl font-medium transition-all duration-200 cursor-pointer whitespace-nowrap"
+                className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-medium text-white transition-all duration-200 cursor-pointer hover:bg-indigo-700 sm:mx-1.5 sm:w-auto sm:whitespace-nowrap sm:px-8 sm:py-4"
               >
                 Search
               </button>
