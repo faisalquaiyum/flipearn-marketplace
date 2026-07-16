@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { CirclePlus, X, XCircle } from "lucide-react";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -41,7 +41,71 @@ const CredentialSubmission = ({ onClose, listing }) => {
         </div>
 
         {/* Form */}
-        
+        <form
+          onSubmit={handleSubmission}
+          className="flex flex-col items-start gap-4 p-4 overflow-y-scroll"
+        >
+          {credential.map((cred, index) => (
+            <div
+              key={cred.type}
+              className="grid grid-cols-[2fr_3fr_1fr] items-center gap-2"
+            >
+              <label className="text-sm font-medium text-gray-800">
+                {cred.name}
+              </label>
+
+              <input
+                type="text"
+                value={cred.value}
+                onChange={(e) =>
+                  setCredential((prev) =>
+                    prev.map((c, i) =>
+                      i === index
+                        ? {
+                            ...c,
+                            value: e.target.value,
+                          }
+                        : c,
+                    ),
+                  )
+                }
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded outline-indigo-400"
+              />
+
+              <X
+                className="w-5 h-5 text-gray-500 hover:text-gray-700 cursor-pointer"
+                onClick={() =>
+                  setCredential((prev) => prev.filter((_, i) => i !== index))
+                }
+              />
+            </div>
+          ))}
+          {/* Add More fields */}
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newField}
+              onChange={(e) => setNewField(e.target.value)}
+              placeholder="field name ..."
+              className="outline-none border-b border-gray-200"
+            />
+            <button
+              type="button"
+              onClick={handleAddField}
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-700 cursor-pointer"
+            >
+              <CirclePlus className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 mt-4 rounded-md"
+          >
+            Submit
+          </button>
+        </form>
       </div>
     </div>
   );
