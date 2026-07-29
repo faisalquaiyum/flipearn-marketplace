@@ -15,7 +15,7 @@ app.use(clerkMiddleware());
 
 app.get("/", (req, res) => res.send("Server is live!"));
 
-app.post("api/inngest", serve({ client: inngest, functions }));
+app.use("/api/inngest", serve({ client: inngest, functions }));
 
 const isDirectRun =
   process.argv[1] &&
