@@ -292,7 +292,6 @@ export const deleteUserListing = async (req, res) => {
     return res.json({
       message: "Listing deleted successfully",
     });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -300,3 +299,136 @@ export const deleteUserListing = async (req, res) => {
     });
   }
 };
+
+// Controller For Adding Credential to Listing
+export const addCredential = async (req, res) => {
+  try {
+    const { userId } = await req.auth();
+    const { listingId, credential } = req.body;
+
+    if (credential.length === 0 || !listingId) {
+      return res.status(400).json({ message: "Missing Fields" });
+    }
+
+    const listing = await prisma.listing.findFirst({
+      where: { id: listingId, ownerId: userId },
+    });
+
+    if (!listing) {
+      return res.status(404).json({
+        message: "Listing not found or you are not the owner",
+      });
+    }
+
+    await prisma.credential.create({
+      data: {
+        listingId,
+        originalCredential: credential,
+      },
+    });
+    await prisma.listing.update({
+      where: { id: listingId },
+      data: { isCredentialSubmitted: true },
+    });
+
+    return res.json({ message: "Credential added successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.code || error.message });
+  }
+};
+
+// Controller For Marking Listing as Featured
+export const markFeatured = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = await req.auth();
+
+    if (req.plan !== "premium") {
+      return res.status(400).json({ message: "Premium plan required" });
+    }
+    // Unset all other featured listings
+    await prisma.listing.updateMany({
+      where: { ownerId: userId },
+      data: { featured: false },
+    });
+    // Mark the listing as featured
+    await prisma.listing.update({
+      where: { id },
+      data: { featured: true },
+    });
+    return res.json({ message: "Listing marked as featured" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.code || error.message });
+  }
+};
+
+// Controller For Getting All User Orders
+export const getAllUserOrders = async (req, res) => {
+  try {
+    const { userId } = await req.auth();
+    let orders = await prisma.transaction.findMany({
+      where: { userId, isPaid: true },
+      include: { listing: true },
+    });
+    if (!orders || orders.length === 0) {
+      return res.json({ orders: [] });
+    }
+    // Attach the credential to each order
+    const credentials = await prisma.credential.findMany({
+      where: {
+        listingId: {
+          in: orders.map((order) => order.listingId),
+        },
+      },
+    });
+    const ordersWithCredentials = orders.map((order) => {
+      const credential = credentials.find(
+        (cred) => cred.listingId === order.listingId,
+      );
+      return { ...order, credential };
+    });
+    return res.json({ orders: ordersWithCredentials });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.code || error.message });
+  }
+};
+
+// Controller For Withdrawing Amount
+export const withdrawAmount = async (req, res) => {
+  try {
+    const { userId } = await req.auth();
+    const { amount, account } = req.body;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const balance = user.earned - user.withdrawn;
+
+    if (amount > balance) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
+    const withdrawal = await prisma.withdrawal.create({
+      data: {
+        userId,
+        amount,
+        account,
+      },
+    });
+    await prisma.user.update({
+      where: { id: userId },
+      data: { withdrawn: { increment: amount } },
+    });
+
+    return res.json({
+      message: "Applied for withdrawal",
+      withdrawal,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.code || error.message });
+  }
+};
+
+export const purchaseAccount = async (req, res) => {
+
+}
