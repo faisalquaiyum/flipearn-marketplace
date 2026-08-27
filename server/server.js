@@ -7,6 +7,7 @@ import { inngest, functions } from "./inngest/index.js";
 import { fileURLToPath } from "url";
 import path from "path";
 import listingRouter from "./routes/listingRoutes.js";
+import chatRouter from "./routes/chatRoutes.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.get("/", (req, res) => res.send("Server is live!"));
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
 app.use("/api/listing", listingRouter);
+app.use("/api/chat", chatRouter);
 
 const isDirectRun =
   process.argv[1] &&
