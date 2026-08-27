@@ -6,6 +6,7 @@ import { serve } from "inngest/express";
 import { inngest, functions } from "./inngest/index.js";
 import { fileURLToPath } from "url";
 import path from "path";
+import listingRouter from "./routes/listingRoutes.js";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(clerkMiddleware());
 app.get("/", (req, res) => res.send("Server is live!"));
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
+app.use("/api/listing", listingRouter);
 
 const isDirectRun =
   process.argv[1] &&
