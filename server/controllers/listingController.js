@@ -1,4 +1,4 @@
-import { prisma } from "../config/prisma.js";
+import prisma from "../configs/prisma.js";
 import imagekit from "../configs/imageKit.js";
 import fs from "fs";
 
@@ -429,6 +429,4 @@ export const withdrawAmount = async (req, res) => {
   }
 };
 
-export const purchaseAccount = async (req, res) => {
-
-}
+export const purchaseAccount = async (req, res) => {};
