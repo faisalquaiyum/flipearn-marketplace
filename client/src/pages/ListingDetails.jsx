@@ -19,9 +19,12 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { setChat } from "../app/features/chatSlice";
+import { useUser } from "@clerk/react";
+import toast from "react-hot-toast";
 
 const ListingDetails = () => {
   const dispatch = useDispatch();
+  const { user, isLoaded } = useUser();
 
   const navigate = useNavigate();
   const currency = import.meta.env.VITE_CURRENCY || "$";
@@ -44,7 +47,11 @@ const ListingDetails = () => {
   const purchaseAccount = async () => {};
 
   const loadChatbox = () => {
-    dispatch(setChat({listing: listing}));
+    if (!isLoaded || !user) return toast.error("Please login to chat with seller");
+    if (user.id === listing.ownerId)
+      return toast.error("You can't chat with your own listing");
+
+    dispatch(setChat({ listing: listing }));
   };
 
   useEffect(() => {

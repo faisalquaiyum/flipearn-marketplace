@@ -4,11 +4,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { useDispatch } from "react-redux";
 import { setChat } from "../app/features/chatSlice";
+import { useAuth, useUser } from "@clerk/react";
+import api from "../configs/axios";
+import toast from "react-hot-toast";
 
 const Messages = () => {
-
   const dispatch = useDispatch();
-  const user = { id: "user_1" };
+  const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
 
   const [chats, setChats] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,31 +32,43 @@ const Messages = () => {
   const filteredChats = useMemo(() => {
     const query = searchQuery.toLowerCase();
     return chats.filter((chat) => {
-        const chatUser =
-            chat.chatUserId === user?.id ? chat?.ownerUser : chat?.chatUser;
-        return (
-            chat.listing?.title?.toLowerCase().includes(query) ||
-            chatUser?.name?.toLowerCase().includes(query)
-        );
+      const chatUser =
+        chat.chatUserId === user?.id ? chat?.ownerUser : chat?.chatUser;
+      return (
+        chat.listing?.title?.toLowerCase().includes(query) ||
+        chatUser?.name?.toLowerCase().includes(query)
+      );
     });
-}, [chats, searchQuery]);
+  }, [chats, searchQuery]);
 
-const handleOpenChat = (chat) => {
+  const handleOpenChat = (chat) => {
     dispatch(setChat({ listing: chat.listing, chatId: chat.id }));
-}
+  };
 
   const fetchUserChats = async () => {
-    setChats(dummyChats);
-    setLoading(false);
+    try {
+      const token = await getToken();
+      const { data } = await api.get("/api/chat/user", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setChats(data.chats);
+      setLoading(false);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchUserChats();
-    const interval = setInterval(() => {
+    if (user && isLoaded) {
       fetchUserChats();
-    }, 10 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+      const interval = setInterval(() => {
+        fetchUserChats();
+      }, 10 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [user, isLoaded]);
 
   return (
     <div className="mx-auto min-h-screen px-6 md:px-16 lg:px-24 xl:px-32">
